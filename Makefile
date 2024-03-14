@@ -1,4 +1,4 @@
-SRC = game/cub3d.c
+SRC = game/cub3d.c		game/draw_line.c 
 OBJ = $(SRC:.c=.o)
 CC = cc
 CFLAGS = -Wall -Wextra -Werror

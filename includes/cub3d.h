@@ -6,7 +6,7 @@
 /*   By: hsobane <hsobane@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 13:51:14 by hsobane           #+#    #+#             */
-/*   Updated: 2024/03/13 16:00:59 by hsobane          ###   ########.fr       */
+/*   Updated: 2024/03/14 12:08:45 by hsobane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <errno.h>
 # include <limits.h>
 # include <mlx.h>
+# include <signal.h>
 # include "parser.h"
 
 # define TILE_SIZE 25
@@ -82,5 +83,9 @@ typedef struct s_data
 	t_player	player;
 	t_key       key;
 }				t_data;
+
+void	draw_fov(t_data *data, t_point start, int color);
+void	draw_line(t_data *data, t_line line, int color);
+
 
 #endif

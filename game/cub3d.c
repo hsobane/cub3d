@@ -6,7 +6,7 @@
 /*   By: hsobane <hsobane@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 13:48:58 by hsobane           #+#    #+#             */
-/*   Updated: 2024/03/13 16:22:37 by hsobane          ###   ########.fr       */
+/*   Updated: 2024/03/14 12:24:36 by hsobane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,10 @@ static void ft_move(t_data *data)
 		data->player.dir -= PI / 8;
 	else if (data->key == K_RIGHT)
 		data->player.dir += PI / 8;
-	if (data->player.dir > TWO_PI || data->player.dir < -TWO_PI)
-		data->player.dir = 0;
+	if (data->player.dir < 0)
+		data->player.dir += TWO_PI;
+	if (data->player.dir > TWO_PI)
+		data->player.dir -= TWO_PI;
 	if (data->player.x < 0)
 		data->player.x = 0;
 	if (data->player.y < 0)
@@ -137,50 +139,6 @@ void draw_player(t_mlx mlx, t_player player)
 	mlx_do_sync(mlx.mlx);
 }
 
-void draw_line(t_data *data, t_line *line)
-{
-	int dx;
-	int dy;
-	int d;
-	int i;
-	int y;
-	
-
-	dx = abs(line->end.x - line->start.x);
-	dy = abs(line->end.y - line->start.y);
-	y = fmin(line->start.y, line->end.y);
-	d = 2 * dy - dx;
-	i = 0;
-	while (i < dx)
-	{
-		mlx_pixel_put(data->mlx.mlx, data->mlx.win, line->start.x + i, y, 0x0000FF);
-		if (d > 0)
-		{
-			// d > 0 means we need to move up or down
-			y++;
-			d -= 2 * dx;
-		}
-		// 
-		d += 2 * dy;
-		i++;
-	}
-	
-}
-
-double ft_cos(double angle)
-{
-	if (cos(angle) < 0)
-		return (sin(angle));
-	return (cos(angle));
-}
-
-double ft_sin(double angle)
-{
-	if (sin(angle) < 0)
-		return (cos(angle));
-	return (sin(angle));
-}
-
 int game_loop(void *param)
 {
 	t_data *data;
@@ -214,9 +172,10 @@ int game_loop(void *param)
 	}
 	draw_player(data->mlx, data->player);
 	t_line line;
-	line = (t_line){(t_point){data->player.x * TILE_SIZE, data->player.y * TILE_SIZE},
-		(t_point){data->player.x * TILE_SIZE + 100 * ft_cos(data->player.dir), data->player.y * TILE_SIZE + 100 * ft_sin(data->player.dir)}};
-	draw_line(data, &line);
+	line = (t_line){(t_point){data->player.x * TILE_SIZE + 5, data->player.y * TILE_SIZE + 5},
+		(t_point){data->player.x * TILE_SIZE + cos(data->player.dir) * 50,
+		data->player.y * TILE_SIZE+ sin(data->player.dir) * 50}};
+	draw_fov(data, line.start, 0x00FF00);
 	usleep(1000000 / FPS);
 	return (0);
 }
@@ -234,8 +193,8 @@ int main(int argc, char const *argv[])
 	
 	data.mlx.mlx = mlx_init();
 	data.mlx.win = mlx_new_window(data.mlx.mlx, TILE_SIZE * width, TILE_SIZE * height, "Cub3D");
-	mlx_key_hook(data.mlx.win, key_hook, &data);
-	mlx_hook(data.mlx.win, 17, 0, ft_close, &data);
+	mlx_hook(data.mlx.win, 17, 1L << 17, ft_close, &data);
+	mlx_hook(data.mlx.win, 2, 1L << 0, key_hook, &data);
 	mlx_loop_hook(data.mlx.mlx, game_loop, &data);
 	mlx_loop(data.mlx.mlx);
 	return (0);
